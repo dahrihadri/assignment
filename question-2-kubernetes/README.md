@@ -28,7 +28,7 @@ Before using this Helm chart, ensure you have the following:
 1. **Clone this Repository:**
 
    ```bash
-   git clone https://github.com/your-username/question-2-kubernetes.git
+   git clone https://github.com/dahrihadri/assignment.git
    cd question-2-kubernetes
    ```
 
@@ -108,6 +108,17 @@ Describe the pod to check for errors:
 ```bash
 kubectl describe pod <pod-name> -n example-namespace
 ```
+
+3. **Helm Namespace Annotations Issue:**
+
+If you see issues related to Helm tracking resources in the namespace, or if you see warnings about conflicting annotations, you can manually add the correct annotations to your namespace. This should not typically be required, but if needed, run the following commands:
+
+```bash
+kubectl annotate namespace example-namespace meta.helm.sh/release-name=question-2-kubernetes
+kubectl annotate namespace example-namespace meta.helm.sh/release-namespace=example-namespace
+```
+
+After running the above commands, retry your helm install or helm upgrade command.
 
 ## Helm Chart Structure
 
