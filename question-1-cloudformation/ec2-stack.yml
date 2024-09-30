@@ -1,0 +1,121 @@
+Parameters:
+  PrivateSubnet1:
+    Description: Private Subnet 1
+    Type: String
+  PrivateSubnet2:
+    Description: Private Subnet 2
+    Type: String
+  SGforInstances:
+    Description: Security Group for Instances
+    Type: String
+  TargetGroupArn:
+    Description: Target group
+    Type: String
+
+Resources:
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: EC2 role
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+  ASG:
+    Properties:
+      DefaultInstanceWarmup: 10
+      DesiredCapacity: 1
+      DesiredCapacityType: units
+      HealthCheckGracePeriod: 10
+      HealthCheckType: EC2
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MaxSize: 2
+      MetricsCollection:
+        - Granularity: 1Minute
+      MinSize: 1
+      NewInstancesProtectedFromScaleIn: false
+      Tags:
+        - Key: Name
+          PropagateAtLaunch: true
+          Value: Web Portal
+      TargetGroupARNs:
+        - Ref: TargetGroupArn
+      TerminationPolicies:
+        - NewestInstance
+      VPCZoneIdentifier:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+    Type: AWS::AutoScaling::AutoScalingGroup
+
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        CreditSpecification:
+          CpuCredits: unlimited
+        EbsOptimized: true
+        IamInstanceProfile:
+          Name: !Ref InstanceProfile
+        ImageId: ami-04c913012f8977029 #Amazon Linux 2023 AMI 2023.4.20240611.0 x86_64 HVM kernel-6.1
+        InstanceType: t3.medium
+        KeyName: mykey
+        SecurityGroupIds:
+          - !Ref SGforInstances
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash -x
+            yum check-update
+            yum upgrade -y
+            until yum install -y nginx
+            do
+              echo "Try again"
+            done
+            aws s3 cp s3://website-source-9798/website.conf /etc/nginx/conf.d/
+            mkdir -p /var/www/html
+            aws s3 cp s3://website-source-9798/index.html /var/www/html/
+            systemctl enable nginx
+            systemctl start nginx
+
+  ScaleUpPolicy:
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref ASG
+      Cooldown: 300
+      PolicyType: SimpleScaling
+      ScalingAdjustment: 1
+    Type: AWS::AutoScaling::ScalingPolicy
+
+  ScaleDownPolicy:
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref ASG
+      Cooldown: 300
+      PolicyType: SimpleScaling
+      ScalingAdjustment: -1
+    Type: AWS::AutoScaling::ScalingPolicy
+
+Outputs:
+  ScaleDownArn:
+    Description: Scale down ARN
+    Value: !Ref ScaleDownPolicy
+  ScaleUpArn:
+    Description: Scale up ARN
+    Value: !Ref ScaleUpPolicy

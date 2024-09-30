@@ -1,0 +1,115 @@
+Parameters:
+  VPC:
+    Type: String
+    Description: Imported VPC
+  PrivateSubnet1:
+    Type: String
+    Description: Private Subnet 1
+  PrivateSubnet2:
+    Type: String
+    Description: Private Subnet 2
+  SGforInstances:
+    Type: String
+    Description: Security Group for instances
+  PrivateRouteTable1:
+    Type: String
+    Description: Private Subnet Route Table 1
+  PrivateRouteTable2:
+    Type: String
+    Description: Private Subnet Route Table 2
+
+Resources:
+  SSMEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - Ref: SGforInstances
+      ServiceName: com.amazonaws.ap-southeast-1.ssm
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: VPC
+
+  EC2MessagesEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - Ref: SGforInstances
+      ServiceName: com.amazonaws.ap-southeast-1.ec2messages
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: VPC
+
+  EC2Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - Ref: SGforInstances
+      ServiceName: com.amazonaws.ap-southeast-1.ec2
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: VPC
+
+  SSMMessagesEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - Ref: SGforInstances
+      ServiceName: com.amazonaws.ap-southeast-1.ssmmessages
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: VPC
+
+  KMSEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - Ref: SGforInstances
+      ServiceName: com.amazonaws.ap-southeast-1.kms
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: VPC
+
+  LogsEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - Ref: SGforInstances
+      ServiceName: com.amazonaws.ap-southeast-1.logs
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: VPC
+
+  S3GatewayEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      RouteTableIds:
+        - Ref: PrivateRouteTable1
+        - Ref: PrivateRouteTable2
+      ServiceName: com.amazonaws.ap-southeast-1.s3
+      VpcEndpointType: Gateway
+      VpcId:
+        Ref: VPC

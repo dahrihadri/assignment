@@ -1,0 +1,49 @@
+Parameters:
+  SGforInstances:
+    Type: String
+    Description: Security Group for Instances
+  PublicSubnet1:
+    Type: String
+    Description: Public Subnet 1
+
+Resources:
+
+  SSMHost:
+    Type: AWS::EC2::Instance
+    Properties:
+      CreditSpecification:
+        CPUCredits: unlimited
+      EbsOptimized: true
+      IamInstanceProfile: !Ref InstanceProfile
+      ImageId: ami-04c913012f8977029 #Amazon Linux 2023 AMI 2023.4.20240611.0 x86_64 HVM kernel-6.1
+      InstanceType: t3.small
+      PropagateTagsToVolumeOnCreation: true
+      SecurityGroupIds:
+        - !Ref SGforInstances
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: SSM Host
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: EC2 role
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore

@@ -1,0 +1,58 @@
+Parameters:
+  PrivateSubnet1:
+    Description: Private Subnet 1
+    Type: String
+  PrivateSubnet2:
+    Description: Private Subnet 2
+    Type: String
+  VPC:
+    Description: VPC
+    Type: String
+
+Resources:
+  RDSMariaDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: 100
+      AllowMajorVersionUpgrade: false
+      BackupRetentionPeriod: 30
+      DBInstanceClass: db.t4g.small
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DeleteAutomatedBackups: false
+      EnableCloudwatchLogsExports:
+        - audit
+        - error
+        - general
+        - slowquery
+      Engine: mariadb
+      EngineVersion: 10.11.8
+      MasterUsername: admin
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:rds-mariadb}}"
+      MaxAllocatedStorage: 1000
+      MultiAZ: true
+      PreferredBackupWindow: 17:00-18:00
+      PreferredMaintenanceWindow: Sun:18:00-Sun:19:00
+      PubliclyAccessible: false
+      VPCSecurityGroups:
+        - Ref: SGforRDS
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for RDS
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  SGforRDS:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for RDS
+      SecurityGroupIngress:
+        - CidrIp: 192.168.0.0/16
+          Description: SG for RDS
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+      VpcId:
+        Ref: VPC
