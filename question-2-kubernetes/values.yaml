@@ -1,0 +1,25 @@
+# Declare variables to be passed into your templates.
+
+namespace: example-namespace
+
+replicas: 3
+
+image:
+  repository: busybox
+  tag: latest
+
+ingress:
+  host: example.com
+
+secret:
+  username: admin
+  password: password
+
+config:
+  key: my-configuration
+
+storage:
+  size: 10Gi
+
+efs:
+  volumeHandle: fs-12345678                # Replace with your actual EFS file system ID

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      labels:
+        app: example-app
+    spec:
+      containers:
+      - name: main-container
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        command: ["tail", "-f", "/dev/null"]  # Keep the container alive
+        ports:
+        - containerPort: 80
+        env:
+        - name: SECRET_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: env-secret
+              key: username
+        - name: SECRET_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: env-secret
+              key: password
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/etc/config"
+          subPath: config-key
+        - name: efs-volume  # Mount the EFS volume
+          mountPath: /mnt/efs  # Specify where to mount it in the container
+      volumes:
+      - name: config-volume
+        configMap:
+          name: app-config
+      - name: efs-volume  # Define the EFS volume
+        persistentVolumeClaim:
+          claimName: example-pvc  # Reference the PVC
