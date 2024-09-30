@@ -7,5 +7,5 @@ Review solution [here](https://github.com/dahrihadri/assignment/tree/main/questi
 
 ##Question 2
 Create a Kubernetes manifest based on the architecture diagram above.
-![complete-architecture](assignment/question-2-kubernetesScreenshot.png)
+![complete-architecture](question-2-kubernetes/Screenshot.png)
 Review solution [here](https://github.com/dahrihadri/assignment/tree/main/question-2-kubernetes)
