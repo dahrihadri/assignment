@@ -10,8 +10,8 @@ This repository contains a Helm chart to deploy an above example application usi
 - [Setup](#setup)
 - [Deploy the Helm Chart](#deploy-the-helm-chart)
 - [Access the Application](#access-the-application)
-- [Setup](#setup)
-- [Setup](#setup)
+- [Troubleshooting](#troubleshooting)
+- [Helm Chart Structure](#helm-chart-structure)
 
 ## Prerequisites
 
@@ -126,7 +126,7 @@ question-2-kubernetes/
 ```
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License. See the [License](#license) file for details.
 
 ## Contributing
 
